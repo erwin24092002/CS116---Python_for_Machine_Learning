@@ -85,11 +85,11 @@ if uploaded_file is not None:
         mse = mean_squared_error(y_true=Y_test, y_pred=Y_pred)
         cols = st.columns(3)
         with cols[0]: 
-            scr_v = st.text_input("Score", value=score)
+            st.text_input("Score", value=score)
         with cols[1]:
-            act_v = st.text_input("Mean Absolute Error", value=mae)
+            st.text_input("Mean Absolute Error", value=mae)
         with cols[2]: 
-            prid_v = st.text_input("Mean Squared Error", key=1, value=mse)
+            st.text_input("Mean Squared Error", key=1, value=mse)
         with open('model.pkl','wb') as f:
             pickle.dump(model, f)
 

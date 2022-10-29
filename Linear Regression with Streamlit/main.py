@@ -83,14 +83,16 @@ if uploaded_file is not None:
 
     st.header("Test Model")    
     cols = st.columns(3)
-    input = []
+    input = np.array([])
     enc_idx = -1
     for i in range(len(input_features)):
         if (df.dtypes[input_features[i]] == 'object'):
             a = cols[int(i/len(input_features)*3)].selectbox(input_features[i], df[input_features[i]].unique())
             enc_idx += 1 
+            a = encs[enc_idx].transform(a).to_array()
         else: 
-            input.append(cols[int(i/len(input_features)*3)].text_input(input_features[i]))
+            a = float(cols[int(i/len(input_features)*3)].text_input(input_features[i]))
+        input = np.concatenate((X, x), axis=1)
     print(input)
 
     cols = st.columns(9)

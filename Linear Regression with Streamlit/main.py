@@ -69,9 +69,6 @@ if uploaded_file is not None:
             X = np.concatenate((X, x), axis=1)
     
     # TRAIN MODEL
-    score = 0
-    mae = 0
-    mse = 0
     st.header("Train Model")    
     cols = st.columns(11)
     with cols[5]: 
@@ -80,16 +77,8 @@ if uploaded_file is not None:
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=data_ratio, random_state=1907)
         model = LinearRegression().fit(X_train, Y_train)
         Y_pred = model.predict(X_test)
-        score = model.score(X_test, Y_test)
         mae = mean_absolute_error(y_true=Y_test, y_pred=Y_pred)
         mse = mean_squared_error(y_true=Y_test, y_pred=Y_pred)
-        cols = st.columns(3)
-        with cols[0]: 
-            st.text_input("Score", value=score)
-        with cols[1]:
-            st.text_input("Mean Absolute Error", value=mae)
-        with cols[2]: 
-            st.text_input("Mean Squared Error", key=1, value=mse)
         with open('model.pkl','wb') as f:
             pickle.dump(model, f)
 

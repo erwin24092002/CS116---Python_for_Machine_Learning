@@ -83,8 +83,8 @@ if uploaded_file is not None:
         plt.figure(figsize=(8, 4))
         plot_bar(np.array(['Mean Absolute Error', 'Mean Squered Error']), 
             np.array([round(mae,2), round(mse,2)]), 
-            color='maroon', x_label="Loss Function", y_label="", 
-            title= "")
+            color='maroon', x_label="", y_label="", 
+            title= "EVALUATION METRICS")
         plt.savefig('chart.png')
         with open('model.pkl','wb') as f:
             pickle.dump(model, f)
@@ -125,7 +125,7 @@ if uploaded_file is not None:
         st.text_input(" ", label_visibility='collapsed')
     with cols[1]: 
         st.subheader("Predict Value")
-        st.text_input(" ", value=pred_val[0], label_visibility='collapsed', key=2)
+        st.text_input(" ", value=round(pred_val[0],2), label_visibility='collapsed', key=2)
 
         
             

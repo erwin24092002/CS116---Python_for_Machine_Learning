@@ -1,51 +1,32 @@
-import pandas as pd
+from matplotlib import pyplot as plt
 import numpy as np
-import cv2
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-import pickle
 
-# df = pd.read_csv("car_price.csv")
-# features = ['fueltype','carlength','carwidth']
-# # features = ['carlength','carwidth']
-# Y = df['price'].to_numpy()
-# X = np.array([])
-# encs = []
-# enc_idx = -1
-# for feature in features:
-#     x = df[feature].to_numpy().reshape(-1, 1)
-#     if (df.dtypes[feature] == 'object'):
-#         encs.append(OneHotEncoder(handle_unknown='ignore'))
-#         enc_idx += 1
-#         x = encs[enc_idx].fit_transform(x).toarray()
-#     if len(X)==0:
-#         X = x
-#     else:
-#         X = np.concatenate((X, x), axis=1)
-# X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=0.7, random_state=1907)
-# model = LinearRegression().fit(X_train, Y_train)
-# Y_pred = model.predict(X_test)
-# score = model.score(X_test, Y_test)
-# mae = mean_absolute_error(y_true=Y_test, y_pred=Y_pred)
-# mse = mean_squared_error(y_true=Y_test, y_pred=Y_pred)
-# print(score)
-# print(mae)
-# print(mse)
+# ax1 = plt.subplot()
+# t = np.arange(0.01, 10.0, 0.01)
+# s1 = np.exp(t)
+# plt.plot(t,s1,'b-')
+# plt.xlabel('t (s)')
+# plt.ylabel('exp',color='b')
 
-# x_test = encs[0].transform(['gas']).toarray().reshape(-1, 1)
-# print(X_test[0])
-# print(x_test)
-# x_test = np.concatenate((x_test, np.array([[160.0]])), axis=1)
-# x_test = np.concatenate((x_test, np.array([[60.0]])), axis=1)
+# ax2 = ax1.twinx()
+# s2 = np.sin(2*np.pi*t)
+# ax2.plot(t, s2, 'r.')
+# plt.ylabel('sin', color='r')
+# plt.show()
 
+folds = [str(fold) for fold in range(1, 6)]
+mae = [100, 200, 300, 400, 500]
+mse = [10, 20, 30, 40, 50]
+ax1 = plt.subplot()
+ax1.bar(np.arange(len(folds)) - 0.21, mae, 0.4, label='MAE', color='maroon')
+plt.xticks(np.arange(len(folds)), folds)
+plt.xlabel("Folds")
+plt.ylabel("MAE")
 
-# # print(X_train[0])
-# # x_test = np.array([[160.0, 60.0]])
-# print(x_test)
-# print(model.predict(x_test))
-
-with open('model.pkl', 'rb') as f:
-    model = pickle.load(f)
-    print(model.predict(np.array([[0., 1., 160., 80., 160.]])))
+ax2 = ax1.twinx()
+ax2.bar(np.arange(len(folds)) + 0.21, mse, 0.4, label='MSE', color='green')
+plt.ylabel('MSE')
+plt.title("EVALUATION METRIC")
+plt.legend()
+plt.savefig('chart.png')
+plt.show()

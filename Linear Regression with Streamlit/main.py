@@ -5,7 +5,6 @@ import numpy as np
 import cv2
 import pickle
 import matplotlib.pyplot as plt
-from helper_function import *
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
@@ -90,17 +89,16 @@ if uploaded_file is not None:
         mae = mean_absolute_error(y_true=Y_test, y_pred=Y_pred)
         mse = mean_squared_error(y_true=Y_test, y_pred=Y_pred)
         plt.figure(figsize=(8, 4))
-        plot_bar(np.array([str(data_ratio)]), 
-            np.array([round(mae,2)]), 
-            color='maroon', x_label="Train Data Ratio", y_label="Loss", 
-            title= "MEAN ABSOLUTE ERROR")
-        plt.savefig('mae.png')
-        plt.figure(figsize=(8, 4))
-        plot_bar(np.array([str(data_ratio)]), 
-            np.array([round(mse,2)]), 
-            color='green', x_label="Train Data Ratio", y_label="Loss", 
-            title= "MEAN SQUARED ERROR")
-        plt.savefig('mse.png')
+        ax1 = plt.subplot()
+        ax1.bar(np.arange(1) - 0.21, [mae], 0.4, label='MAE', color='maroon')
+        plt.xticks(np.arange(1), [str(data_ratio)])
+        plt.xlabel("Folds", color='blue')
+        plt.ylabel("Mean Absolute Error", color='maroon')
+        ax2 = ax1.twinx()
+        ax2.bar(np.arange(1) + 0.21, [mse], 0.4, label='MSE', color='green')
+        plt.ylabel('Mean Squared Error', color='green')
+        plt.title("EVALUATION METRIC")
+        plt.savefig('chart.png')
         with open('model.pkl','wb') as f:
             pickle.dump(model, f)
     elif btn_run: 
@@ -117,24 +115,20 @@ if uploaded_file is not None:
             mse.append(round(mean_squared_error(y_true=Y_test, y_pred=Y_pred), 2))
             with open('model.pkl','wb') as f:
                 pickle.dump(model, f)
-        plt.figure(figsize=(8, 3))
-        plot_bar(np.array(folds), 
-            np.array(mae), 
-            color='maroon', x_label="Folds", y_label="Loss", 
-            title= "MEAN ABSOLUTE ERROR")
-        plt.savefig('mae.png')
         plt.figure(figsize=(8, 4))
-        plot_bar(np.array(folds), 
-            np.array(mse), 
-            color='green', x_label="Folds", y_label="Loss", 
-            title= "MEAN SQUARED ERROR")
-        plt.savefig('mse.png')
-    mae_img = cv2.imread('mae.png')
-    if mae_img is not None: 
-        st.image(cv2.cvtColor(mae_img, cv2.COLOR_BGR2RGB)) 
-    mse_img = cv2.imread('mse.png')
-    if mse_img is not None: 
-        st.image(cv2.cvtColor(mse_img, cv2.COLOR_BGR2RGB))      
+        ax1 = plt.subplot()
+        ax1.bar(np.arange(len(folds)) - 0.21, mae, 0.4, label='MAE', color='maroon')
+        plt.xticks(np.arange(len(folds)), folds)
+        plt.xlabel("Folds", color='blue')
+        plt.ylabel("Mean Absolute Error", color='maroon')
+        ax2 = ax1.twinx()
+        ax2.bar(np.arange(len(folds)) + 0.21, mse, 0.4, label='MSE', color='green')
+        plt.ylabel('Mean Squared Error', color='green')
+        plt.title("EVALUATION METRIC")
+        plt.savefig('chart.png')
+    img = cv2.imread('chart.png')
+    if img is not None: 
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))     
 
     # SET INPUT
     st.header("Test Model")    

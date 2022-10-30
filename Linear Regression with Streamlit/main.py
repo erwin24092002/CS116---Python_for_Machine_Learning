@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import pickle
 import matplotlib.pyplot as plt
+from helper_function import *
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -79,8 +80,17 @@ if uploaded_file is not None:
         Y_pred = model.predict(X_test)
         mae = mean_absolute_error(y_true=Y_test, y_pred=Y_pred)
         mse = mean_squared_error(y_true=Y_test, y_pred=Y_pred)
+        plt.figure(figsize=(8, 4))
+        plot_bar(np.array(['Mean Absolute Error', 'Mean Squered Error']), 
+            np.array([round(mae,2), round(mse,2)]), 
+            color='maroon', x_label="Loss Function", y_label="", 
+            title= "")
+        plt.savefig('chart.png')
         with open('model.pkl','wb') as f:
             pickle.dump(model, f)
+    img = cv2.imread('chart.png')
+    if img is not None: 
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))    
 
     # SET INPUT
     st.header("Test Model")    

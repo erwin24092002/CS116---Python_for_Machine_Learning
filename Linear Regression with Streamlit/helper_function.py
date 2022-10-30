@@ -13,5 +13,4 @@ def plot_bar(x_data, y_data, color, x_label, y_label, title):
     plt.xticks(fontsize=10)
     plt.yticks(fontsize=10)
     plt.ylim((0, max(y_data)*1.2))
-    addlabels(x_data, y_data, color)
     plt.title(title)

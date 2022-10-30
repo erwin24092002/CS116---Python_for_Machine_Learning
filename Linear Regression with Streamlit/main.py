@@ -117,7 +117,7 @@ if uploaded_file is not None:
             mse.append(round(mean_squared_error(y_true=Y_test, y_pred=Y_pred), 2))
             with open('model.pkl','wb') as f:
                 pickle.dump(model, f)
-        plt.figure(figsize=(8, 4))
+        plt.figure(figsize=(8, 3))
         plot_bar(np.array(folds), 
             np.array(mae), 
             color='maroon', x_label="Folds", y_label="Loss", 

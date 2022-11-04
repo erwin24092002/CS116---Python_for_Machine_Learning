@@ -35,16 +35,18 @@ if uploaded_file is not None:
     input_features = []
     st.header("Input Features")
     cols = st.columns(4)
+    cboxs = []
     for i in range(len(features)):
-        cbox = cols[int(i/len(features)*4)].checkbox(features[i])
-        if cbox:
-            input_features.append(features[i])
+        cboxs.append(cols[int(i/len(features)*4)].checkbox(features[i]))
     cols = st.columns(7)
     with cols[2]: 
         btn_tall = st.button("Take all")
     with cols[4]:
         btn_clear = st.button("Clear")
-
+    for i in range(len(features)):
+        if cboxs[i]:
+            input_features.append(features[i])
+            
     # CHOSE TYPE OF SPLITTING DATA
     st.header("Type of Splitting Data")
     split_type = st.selectbox(" ", ("Train-Test Split", "K-Fold Cross Validation"), label_visibility="collapsed")

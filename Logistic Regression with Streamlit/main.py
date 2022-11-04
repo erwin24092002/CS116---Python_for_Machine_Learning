@@ -63,7 +63,7 @@ if uploaded_file is not None:
         st.header("Output Feature")
         output_feature = st.selectbox(" ", 
             label_visibility='collapsed',
-            options = [feature for feature in features if feature not in input_features and df.dtypes[feature] != 'object'])
+            options = [feature for feature in features if feature not in input_features and df.dtypes[feature] == 'object'])
     
     # PREPROCESS DATA
     encs = []

@@ -67,7 +67,8 @@ if uploaded_file is not None:
     
     # PREPROCESS DATA
     encs = []
-    Y = LabelEncoder().fit_transform(df[output_feature].to_numpy())
+    label_enc = LabelEncoder()
+    Y = label_enc.fit_transform(df[output_feature].to_numpy())
     X = np.array([])
     enc_idx = -1  
     for feature in input_features:
@@ -99,21 +100,7 @@ if uploaded_file is not None:
         btn_run = st.button("Run")
     if btn_run and split_type=="Train-Test Split":
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=data_ratio, random_state=1907)
-        model = LinearRegression().fit(X_train, Y_train)
-        Y_pred = model.predict(X_test)
-        mae = mean_absolute_error(y_true=Y_test, y_pred=Y_pred)
-        mse = mean_squared_error(y_true=Y_test, y_pred=Y_pred)
-        plt.figure(figsize=(8, 4))
-        ax1 = plt.subplot()
-        ax1.bar(np.arange(1) - 0.21, [mae], 0.4, label='MAE', color='maroon')
-        plt.xticks(np.arange(1), [str(data_ratio)])
-        plt.xlabel("Data Train Ratio", color='blue')
-        plt.ylabel("Mean Absolute Error", color='maroon')
-        ax2 = ax1.twinx()
-        ax2.bar(np.arange(1) + 0.21, [mse], 0.4, label='MSE', color='green')
-        plt.ylabel('Mean Squared Error', color='green')
-        plt.title("EVALUATION METRIC")
-        plt.savefig('chart.png')
+        model = LogisticRegression(solver='lbfgs', max_iter=10000).fit(X_train, Y_train)
         with open('model.pkl','wb') as f:
             pickle.dump(model, f)
     elif btn_run: 
@@ -124,23 +111,10 @@ if uploaded_file is not None:
         for train_index, test_index in kf.split(X):
             X_train, X_test = X[train_index, :], X[test_index, :]
             Y_train, Y_test = Y[train_index], Y[test_index]
-            model = LinearRegression().fit(X_train, Y_train)
+            model = LogisticRegression().fit(X_train, Y_train)
             Y_pred = model.predict(X_test)
-            mae.append(round(mean_absolute_error(y_true=Y_test, y_pred=Y_pred), 2))
-            mse.append(round(mean_squared_error(y_true=Y_test, y_pred=Y_pred), 2))
             with open('model.pkl','wb') as f:
                 pickle.dump(model, f)
-        plt.figure(figsize=(8, 4))
-        ax1 = plt.subplot()
-        ax1.bar(np.arange(len(folds)) - 0.21, mae, 0.4, label='MAE', color='maroon')
-        plt.xticks(np.arange(len(folds)), folds)
-        plt.xlabel("Folds", color='blue')
-        plt.ylabel("Mean Absolute Error", color='maroon')
-        ax2 = ax1.twinx()
-        ax2.bar(np.arange(len(folds)) + 0.21, mse, 0.4, label='MSE', color='green')
-        plt.ylabel('Mean Squared Error', color='green')
-        plt.title("EVALUATION METRIC")
-        plt.savefig('chart.png')
     img = cv2.imread('chart.png')
     if img is not None: 
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))     
@@ -178,7 +152,7 @@ if uploaded_file is not None:
         st.text_input(" ", label_visibility='collapsed')
     with cols[1]: 
         st.subheader("Predict Value")
-        st.text_input(" ", value=round(pred_val[0],2), label_visibility='collapsed', key=2)
+        st.text_input(" ", value=label_enc.inverse_transform(pred_val)[0], label_visibility='collapsed', key=2)
 
         
             

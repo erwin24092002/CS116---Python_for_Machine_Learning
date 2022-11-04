@@ -34,15 +34,21 @@ if uploaded_file is not None:
     features = df.columns.to_numpy()
     input_features = []
     st.header("Input Features")
-    cols = st.columns(4)
     cboxs = []
+    cols = st.columns(4)
     for i in range(len(features)):
         cboxs.append(cols[int(i/len(features)*4)].checkbox(features[i]))
-    cols = st.columns(7)
-    with cols[2]: 
-        btn_tall = st.button("Take all")
-    with cols[4]:
-        btn_clear = st.button("Clear")
+    # cols = st.columns(7)
+    # with cols[2]: 
+    #     btn_takeall = st.button("Take all")
+    # if btn_takeall: 
+    #     for cbox in cboxs: 
+    #         cbox = True
+    # with cols[4]:
+    #     btn_clear = st.button("Clear")
+    # if btn_clear: 
+    #     for cbox in cboxs: 
+    #         cbox = False
     for i in range(len(features)):
         if cboxs[i]:
             input_features.append(features[i])
@@ -50,6 +56,8 @@ if uploaded_file is not None:
     # CHOSE TYPE OF SPLITTING DATA
     st.header("Type of Splitting Data")
     split_type = st.selectbox(" ", ("Train-Test Split", "K-Fold Cross Validation"), label_visibility="collapsed")
+    
+    # SELECT FEATURES TO PREDICT
     cols = st.columns(2)
     with cols[0]:
         st.header("Output Feature")

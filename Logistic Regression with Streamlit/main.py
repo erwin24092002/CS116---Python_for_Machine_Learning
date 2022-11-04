@@ -5,10 +5,10 @@ import numpy as np
 import cv2
 import pickle
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression 
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 
@@ -67,7 +67,7 @@ if uploaded_file is not None:
     
     # PREPROCESS DATA
     encs = []
-    Y = df[output_feature].to_numpy()
+    Y = LabelEncoder().fit_transform(df[output_feature].to_numpy())
     X = np.array([])
     enc_idx = -1  
     for feature in input_features:

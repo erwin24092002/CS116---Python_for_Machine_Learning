@@ -7,9 +7,10 @@ import pickle
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import KFold
-from sklearn.linear_model import LinearRegression, LogisticRegression 
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.model_selection import KFold 
+from sklearn.linear_model import LogisticRegression 
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix
+from helper_function import *
 
 
 st.title("LOGISTIC REGRESSION WITH STREAMLIT")
@@ -38,17 +39,6 @@ if uploaded_file is not None:
     cols = st.columns(4)
     for i in range(len(features)):
         cboxs.append(cols[int(i/len(features)*4)].checkbox(features[i]))
-    # cols = st.columns(7)
-    # with cols[2]: 
-    #     btn_takeall = st.button("Take all")
-    # if btn_takeall: 
-    #     for cbox in cboxs: 
-    #         cbox = True
-    # with cols[4]:
-    #     btn_clear = st.button("Clear")
-    # if btn_clear: 
-    #     for cbox in cboxs: 
-    #         cbox = False
     for i in range(len(features)):
         if cboxs[i]:
             input_features.append(features[i])
@@ -67,8 +57,8 @@ if uploaded_file is not None:
     
     # PREPROCESS DATA
     encs = []
-    label_enc = LabelEncoder()
-    Y = label_enc.fit_transform(df[output_feature].to_numpy())
+    Y = df[output_feature].to_numpy()
+    print(np.unique(Y))
     X = np.array([])
     enc_idx = -1  
     for feature in input_features:
@@ -95,29 +85,32 @@ if uploaded_file is not None:
 
     # TRAIN MODEL
     st.header("Train Model")    
+    labels = np.unique(Y)
     cols = st.columns(11)
     with cols[5]: 
         btn_run = st.button("Run")
+    label = st.selectbox("label", label_visibility = "collapsed", options = labels)
+    
     if btn_run and split_type=="Train-Test Split":
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=data_ratio, random_state=1907)
-        model = LogisticRegression(solver='lbfgs', max_iter=10000).fit(X_train, Y_train)
+        model = LogisticRegression(solver='lbfgs', max_iter=100).fit(X_train, Y_train)
         with open('model.pkl','wb') as f:
             pickle.dump(model, f)
+        cf_matrix = confusion_matrix(Y_test, model.predict(X_test), labels=labels)
+        id = np.where(labels==label)[0][0]
+        
+
     elif btn_run: 
         kf = KFold(n_splits=k_fold, random_state=None)
         folds = [str(fold) for fold in range(1, k_fold+1)]
-        mae = []
-        mse = []
         for train_index, test_index in kf.split(X):
             X_train, X_test = X[train_index, :], X[test_index, :]
             Y_train, Y_test = Y[train_index], Y[test_index]
-            model = LogisticRegression().fit(X_train, Y_train)
-            Y_pred = model.predict(X_test)
+            model = LogisticRegression(solver='lbfgs', max_iter=100).fit(X_train, Y_train)
             with open('model.pkl','wb') as f:
                 pickle.dump(model, f)
-    img = cv2.imread('chart.png')
-    if img is not None: 
-        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))     
+    
+         
 
     # SET INPUT
     st.header("Test Model")    
@@ -152,7 +145,7 @@ if uploaded_file is not None:
         st.text_input(" ", label_visibility='collapsed')
     with cols[1]: 
         st.subheader("Predict Value")
-        st.text_input(" ", value=label_enc.inverse_transform(pred_val)[0], label_visibility='collapsed', key=2)
+        # st.text_input(" ", value=pred_val[0], label_visibility='collapsed', key=2)
 
         
             

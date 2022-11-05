@@ -2,9 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np 
 
 def get_precision(cf_matrix, id): 
+    if np.sum(cf_matrix[:, id]) == 0: 
+        return 0
     return cf_matrix[id, id] / np.sum(cf_matrix[:, id])
 
 def get_recall(cf_matrix, id): 
+    if np.sum(cf_matrix[id, :]) == 0: 
+        return 0
     return cf_matrix[id, id] / np.sum(cf_matrix[id, :])
 
 def get_f1(cf_matrix, id):

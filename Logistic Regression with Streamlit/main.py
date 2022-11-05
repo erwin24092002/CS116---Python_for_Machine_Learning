@@ -96,7 +96,7 @@ if uploaded_file is not None:
             pickle.dump(model, f)
         cf_matrix = confusion_matrix(Y_test, model.predict(X_test), labels=labels)
         Y_pred = model.predict_proba(X_test)
-        print(Y_pred)
+        logloss = log_loss(Y_test, Y_pred, labels=labels)
         for id in range(len(labels)):
             label = labels[id]
             plt.figure(figsize=(8, 4))
@@ -111,7 +111,8 @@ if uploaded_file is not None:
             plt.legend()
 
             ax2 = ax1.twinx()
-            plt.ylim((0, 10))
+            plt.ylim((0, logloss*2))
+            ax2.bar(np.arange(1) + 0.33, [logloss], 0.2, label='Log Loss', color='purple')
             plt.ylabel('Log Loss', color='purple')
             plt.title(label)
             plt.savefig('images/' + label + '.png')
@@ -119,12 +120,57 @@ if uploaded_file is not None:
     elif btn_run: 
         kf = KFold(n_splits=k_fold, random_state=None)
         folds = [str(fold) for fold in range(1, k_fold+1)]
+        pre = []
+        re = []
+        f1 = []
+        logloss = []
         for train_index, test_index in kf.split(X):
             X_train, X_test = X[train_index, :], X[test_index, :]
             Y_train, Y_test = Y[train_index], Y[test_index]
             model = LogisticRegression(solver='lbfgs', max_iter=100).fit(X_train, Y_train)
             with open('model.pkl','wb') as f:
                 pickle.dump(model, f)
+            cf_matrix = confusion_matrix(Y_test, model.predict(X_test), labels=labels)
+            Y_pred = model.predict_proba(X_test)
+            pree = []
+            ree = []
+            f11 = []
+            loglosss = []
+            for id in range(len(labels)):
+                pree.append(get_precision(cf_matrix, id))
+                ree.append(get_precision(cf_matrix, id))
+                f11.append(get_precision(cf_matrix, id))
+                loglosss.append(log_loss(Y_test, Y_pred, labels=labels))
+            pre.append(pree)
+            re.append(ree)
+            f1.append(f11)
+            logloss.append(loglosss)
+        pre = np.array(pre)
+        re = np.array(re)
+        f1 = np.array(f1)
+        logloss = np.array(logloss)
+        print(logloss)
+
+        for id in range(len(labels)):
+            label = labels[id]
+            plt.figure(figsize=(8, 4))
+            ax1 = plt.subplot()
+            plt.ylim((0, 1.2))
+            ax1.bar(np.arange(len(pre[:, id])) - 0.33, pre[:, id], 0.2, label='Precision', color='maroon')
+            ax1.bar(np.arange(len(re[:, id])) - 0.11, re[:, id], 0.2, label='Recall', color='orange')
+            ax1.bar(np.arange(len(f1[:, id])) + 0.11, f1[:, id], 0.2, label='F1 Score', color='green')
+            plt.xticks(np.arange(len(folds)), folds)
+            plt.xlabel("Folds")
+            plt.ylabel("Performance (%)")
+            plt.legend()
+
+            ax2 = ax1.twinx()
+            plt.ylim((0, max(logloss[:, 0])*2))
+            ax2.bar(np.arange(len(logloss[:, id])) + 0.33, logloss[:, id], 0.2, label='Log Loss', color='purple')
+            plt.ylabel('Log Loss', color='purple')
+            plt.title(label)
+            plt.savefig('images/' + label + '.png')
+            
     
     label = st.selectbox("label", label_visibility = "collapsed", options = labels)
     img = cv2.imread('images/' + label + '.png')

@@ -9,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold 
 from sklearn.linear_model import LogisticRegression 
-from sklearn.metrics import confusion_matrix, plot_confusion_matrix
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix, log_loss
 from helper_function import *
 
 
@@ -58,7 +58,6 @@ if uploaded_file is not None:
     # PREPROCESS DATA
     encs = []
     Y = df[output_feature].to_numpy()
-    print(np.unique(Y))
     X = np.array([])
     enc_idx = -1  
     for feature in input_features:
@@ -89,7 +88,6 @@ if uploaded_file is not None:
     cols = st.columns(11)
     with cols[5]: 
         btn_run = st.button("Run")
-    label = st.selectbox("label", label_visibility = "collapsed", options = labels)
     
     if btn_run and split_type=="Train-Test Split":
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=data_ratio, random_state=1907)
@@ -97,19 +95,26 @@ if uploaded_file is not None:
         with open('model.pkl','wb') as f:
             pickle.dump(model, f)
         cf_matrix = confusion_matrix(Y_test, model.predict(X_test), labels=labels)
-        id = np.where(labels==label)[0][0]
-        plt.figure(figsize=(8, 4))
-        ax1 = plt.subplot()
-        ax1.bar(np.arange(1) - 0.21, [mae], 0.4, label='MAE', color='maroon')
-        plt.xticks(np.arange(1), [str(data_ratio)])
-        plt.xlabel("Folds", color='blue')
-        plt.ylabel("Mean Absolute Error", color='maroon')
-        ax2 = ax1.twinx()
-        ax2.bar(np.arange(1) + 0.21, [mse], 0.4, label='MSE', color='green')
-        plt.ylabel('Mean Squared Error', color='green')
-        plt.title("EVALUATION METRIC")
-        plt.savefig('chart.png')
-        
+        Y_pred = model.predict_proba(X_test)
+        print(Y_pred)
+        for id in range(len(labels)):
+            label = labels[id]
+            plt.figure(figsize=(8, 4))
+            ax1 = plt.subplot()
+            plt.ylim((0, 1.2))
+            ax1.bar(np.arange(1) - 0.33, [get_precision(cf_matrix, id)], 0.2, label='Precision', color='maroon')
+            ax1.bar(np.arange(1) - 0.11, [get_recall(cf_matrix, id)], 0.2, label='Recall', color='orange')
+            ax1.bar(np.arange(1) + 0.11, [get_f1(cf_matrix, id)], 0.2, label='F1 Score', color='green')
+            plt.xticks(np.arange(1), [str(data_ratio)])
+            plt.xlabel("Train Ratio")
+            plt.ylabel("Performance (%)")
+            plt.legend()
+
+            ax2 = ax1.twinx()
+            plt.ylim((0, 10))
+            plt.ylabel('Log Loss', color='purple')
+            plt.title(label)
+            plt.savefig('images/' + label + '.png')
 
     elif btn_run: 
         kf = KFold(n_splits=k_fold, random_state=None)
@@ -121,6 +126,10 @@ if uploaded_file is not None:
             with open('model.pkl','wb') as f:
                 pickle.dump(model, f)
     
+    label = st.selectbox("label", label_visibility = "collapsed", options = labels)
+    img = cv2.imread('images/' + label + '.png')
+    if img is not None: 
+        st.image(cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
          
 
     # SET INPUT

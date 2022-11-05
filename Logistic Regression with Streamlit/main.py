@@ -98,6 +98,17 @@ if uploaded_file is not None:
             pickle.dump(model, f)
         cf_matrix = confusion_matrix(Y_test, model.predict(X_test), labels=labels)
         id = np.where(labels==label)[0][0]
+        plt.figure(figsize=(8, 4))
+        ax1 = plt.subplot()
+        ax1.bar(np.arange(1) - 0.21, [mae], 0.4, label='MAE', color='maroon')
+        plt.xticks(np.arange(1), [str(data_ratio)])
+        plt.xlabel("Folds", color='blue')
+        plt.ylabel("Mean Absolute Error", color='maroon')
+        ax2 = ax1.twinx()
+        ax2.bar(np.arange(1) + 0.21, [mse], 0.4, label='MSE', color='green')
+        plt.ylabel('Mean Squared Error', color='green')
+        plt.title("EVALUATION METRIC")
+        plt.savefig('chart.png')
         
 
     elif btn_run: 
@@ -145,7 +156,7 @@ if uploaded_file is not None:
         st.text_input(" ", label_visibility='collapsed')
     with cols[1]: 
         st.subheader("Predict Value")
-        # st.text_input(" ", value=pred_val[0], label_visibility='collapsed', key=2)
+        st.text_input(" ", value=pred_val[0], label_visibility='collapsed', key=2)
 
         
             

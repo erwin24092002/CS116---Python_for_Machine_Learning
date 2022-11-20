@@ -10,6 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, log_loss
 import pickle
 from support_function import *
+import math
 
 st.title("LOGISTIC REGRESSION WITH PRINCIPAL COMPONENT ANALYSIS")
 st.markdown(
@@ -33,6 +34,8 @@ y_label = wine["target_names"]
 st.header("WINE DATASET")
 wine_df = pd.DataFrame(wine["data"])
 wine_df.columns = wine["feature_names"]
+wine_df["target"] = wine["target"]
+wine_df = wine_df.sample(frac=1) # suffling data point
 st.write(wine_df.head(5))
 
 # select feature to predict
@@ -47,7 +50,7 @@ for i in range(len(features)):
         input_features.append(features[i])
 
 # pre-processing data
-y = np.array(wine["target"])
+y = np.array(np.array(wine_df["target"]))
 X = np.array([])
 for feature in input_features:
     x = wine_df[feature].to_numpy().reshape(-1, 1)
@@ -80,9 +83,10 @@ with cols[0]:
 with cols[1]:
     if use_pca == "Used":
         st.write("Number of Components")
-        n_components = st.selectbox(" ", range(1, 10), label_visibility="collapsed")
+        n_components = st.selectbox(" ", range(1, 1 if len(input_features)==0 else len(input_features)), label_visibility="collapsed")
         pca = decomposition.PCA(n_components=n_components)
-        X = pca.fit_transform(X)
+        if X.shape[0] != 0:
+            X = pca.fit_transform(X)
 
 # TRAIN MODEL
 st.header("Train Model")    
@@ -90,14 +94,19 @@ cols = st.columns(11)
 with cols[5]: 
     btn_run = st.button("Run")    
 
-
 if btn_run and split_type=="Train-Test Split": 
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=data_ratio, random_state=1907)
     model = LogisticRegression(solver='lbfgs', max_iter=1000).fit(X_train, y_train)
     cf_matrix = confusion_matrix(y_test, model.predict(X_test))
+    logloss = log_loss(y_test, model.predict_proba(X_test))
+    st.write("Train Ratio: {} --- Log Loss: {:0.3f}".format(data_ratio, logloss))
     cols = st.columns(2)
     with cols[0]:
-        st.write(cf_matrix)
+        visualize_result(cf_matrix, "Confusion Matrix", y_label)
+        plt.savefig('images/confusion_matrix.png')
+        img = cv2.imread('images/confusion_matrix.png')
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        st.image(img)
     with cols[1]: 
         plot_performence_chart(cf_matrix, labels=y_label)
         plt.savefig('images/performence_chart.png')
@@ -106,13 +115,26 @@ if btn_run and split_type=="Train-Test Split":
         st.image(img)
 elif btn_run: 
     kf = KFold(n_splits=k_fold, random_state=None)
+    id = 0
     for train_index, test_index in kf.split(X):
+        id += 1
         X_train, X_test = X[train_index, :], X[test_index, :]
         y_train, y_test = y[train_index], y[test_index]
         model = LogisticRegression(solver='lbfgs', max_iter=1000).fit(X_train, y_train)
         cf_matrix = confusion_matrix(y_test, model.predict(X_test))
+        logloss = log_loss(y_test, model.predict_proba(X_test))
+        st.write("Fold: {} --- Log Loss: {:0.3f}".format(id, logloss))
+        cols = st.columns(2)
         with cols[0]:
-            st.write(cf_matrix)
+            visualize_result(cf_matrix, "Confusion Matrix", y_label)
+            plt.savefig('images/confusion_matrix.png')
+            img = cv2.imread('images/confusion_matrix.png')
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            st.image(img)
         with cols[1]: 
-            pass
+            plot_performence_chart(cf_matrix, labels=y_label)
+            plt.savefig('images/performence_chart.png')
+            img = cv2.imread('images/performence_chart.png')
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            st.image(img)
      

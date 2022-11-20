@@ -85,8 +85,6 @@ with cols[1]:
         st.write("Number of Components")
         n_components = st.selectbox(" ", range(1, 1 if len(input_features)==0 else len(input_features)), label_visibility="collapsed")
         pca = decomposition.PCA(n_components=n_components)
-        if X.shape[0] != 0:
-            X = pca.fit_transform(X)
 
 # TRAIN MODEL
 st.header("Train Model")    
@@ -96,6 +94,10 @@ with cols[5]:
 
 if btn_run and split_type=="Train-Test Split": 
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=data_ratio, random_state=1907)
+    if use_pca == "Used":
+        pca.fit(X_train)
+        X_train = pca.transform(X_train)
+        X_test = pca.transform(X_test)
     model = LogisticRegression(solver='lbfgs', max_iter=1000).fit(X_train, y_train)
     cf_matrix = confusion_matrix(y_test, model.predict(X_test))
     logloss = log_loss(y_test, model.predict_proba(X_test))
@@ -120,6 +122,10 @@ elif btn_run:
         id += 1
         X_train, X_test = X[train_index, :], X[test_index, :]
         y_train, y_test = y[train_index], y[test_index]
+        if use_pca == "Used":
+            pca.fit(X_train)
+            X_train = pca.transform(X_train)
+            X_test = pca.transform(X_test)
         model = LogisticRegression(solver='lbfgs', max_iter=1000).fit(X_train, y_train)
         cf_matrix = confusion_matrix(y_test, model.predict(X_test))
         logloss = log_loss(y_test, model.predict_proba(X_test))
